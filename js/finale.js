@@ -68,7 +68,8 @@ window.Finale = (function () {
     moveNo();
   }
 
-  function sayYes(burst) {
+  function sayYes(burst, onYes) {
+    onYes({ noAttempts: attempts });
     no.hidden = true;
     ask.hidden = true;
     official.hidden = false;
@@ -83,7 +84,7 @@ window.Finale = (function () {
     setTimeout(() => burst({ big: true }), 700);
   }
 
-  function init({ burst }) {
+  function init({ burst, onYes = () => {} }) {
     yes.textContent = finale.yes;
     no.textContent = finale.noAttempts[0];
     usPhoto.src = finale.usPhoto;
@@ -93,7 +94,7 @@ window.Finale = (function () {
     no.addEventListener("pointerenter", (e) => {
       if (e.pointerType === "mouse") dodge(e);
     });
-    yes.addEventListener("click", () => sayYes(burst));
+    yes.addEventListener("click", () => sayYes(burst, onYes));
   }
 
   // Unlocked once the game is finished.

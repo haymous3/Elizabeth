@@ -180,7 +180,7 @@
     onReason: Motion.reason,
     onCount: Motion.bump,
   });
-  Finale.init({ burst });
+  Finale.init({ burst, onYes: Notify.saidYes });
   Cinema.init();
   watchGame();
 

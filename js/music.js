@@ -64,7 +64,7 @@ window.Music = (function () {
     if (docked) undock();
   }
 
-  // Called inside the ticket tap, so the browser lets the film play with sound.
+  // Called inside the "Roll the film" tap, so the browser lets the film play with sound.
   function start() {
     wantPlay = true;
     if (ready) yt.playVideo();
@@ -78,11 +78,6 @@ window.Music = (function () {
       }
       if (!playing) hint.hidden = false;
     }, 4500);
-  }
-
-  // Once the curtains are fully open, rewind so she sees it from the first frame.
-  function fromTheTop() {
-    if (ready && !failed) yt.seekTo(0, true);
   }
 
   function setCollapsed(value, instant) {
@@ -118,5 +113,5 @@ window.Music = (function () {
     setCollapsed(true);
   }
 
-  return { start, fromTheTop, dock, undock, collapseOnce };
+  return { start, dock, undock, collapseOnce };
 })();

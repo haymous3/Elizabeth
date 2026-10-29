@@ -27,6 +27,7 @@
   <script defer src="js/music.js"></script>
   <script defer src="js/cinema.js"></script>
   <script defer src="js/game.js"></script>
+  <script defer src="js/notify.js"></script>
   <script defer src="js/finale.js"></script>
   <script defer src="js/main.js"></script>
 </head>
@@ -55,12 +56,17 @@
             <p data-text="cinema.failed"></p>
             <a id="fallback-link" href="#" target="_blank" rel="noopener" data-text="cinema.failedLink"></a>
           </div>
+          <!-- Pre-show title card, like an old silent-film intertitle -->
+          <div class="preshow" id="preshow" hidden>
+            <p class="preshow__title" data-text="cinema.preshowTitle"></p>
+            <p class="preshow__line" data-text="cinema.preshowLine"></p>
+          </div>
         </div>
         <div class="curtain curtain--left" aria-hidden="true"></div>
         <div class="curtain curtain--right" aria-hidden="true"></div>
         <div class="stage__valance" aria-hidden="true"></div>
         <div class="stage__overlay">
-          <button class="ticket" id="ticket" type="button" aria-label="Play our film">
+          <button class="ticket" id="ticket" type="button" aria-label="Enter the cinema">
             <span class="ticket__main">
               <span class="ticket__top" data-text="cinema.ticketTop"></span>
               <span class="ticket__name" data-text="herName"></span>
@@ -73,6 +79,11 @@
           </button>
         </div>
       </div>
+
+      <button class="btn cinema__roll" id="roll-film" type="button" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>
+        <span data-text="cinema.rollButton"></span>
+      </button>
 
       <div class="beam" aria-hidden="true"></div>
       <div class="cinema__dim" aria-hidden="true"></div>

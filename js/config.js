@@ -14,13 +14,17 @@ window.SITE = {
     artist: "Justin Bieber",
   },
 
-  // The opening cinema: she taps the ticket to start the film.
+  // The opening cinema: the ticket opens the curtains, a title card asks her to listen,
+  // and "Roll the film" starts the video.
   cinema: {
     kicker: "Now showing",
     subtitle: "A film for {herName}",
     ticketTop: "Admit one",
-    ticketAction: "Tap to play",
+    ticketAction: "Tap to enter",
     ticketStub: "Seat: next to me",
+    preshowTitle: "Before the film begins…",
+    preshowLine: "Pay attention to every word in the lyrics. Every line is something I want to say to you.",
+    rollButton: "Roll the film",
     afterPlay: "Scroll down whenever you're ready. The song comes with you.",
     waiting: "Tap the screen to start the film",
     failed: "The film couldn't load here.",
@@ -117,5 +121,14 @@ window.SITE = {
     usPhoto: "assests/8.jpg",
     usCaption: "Us.",
     lastLine: "Happy birthday, my love. Here's to this year, and every one after it.",
+  },
+
+  // Emails you the moment she taps "Yes".
+  // 1. Go to https://web3forms.com, enter the email you want the alert sent to, and click "Create Access Key".
+  // 2. Paste the key they email you between the quotes below, then redeploy.
+  // Leave it empty to turn the alert off.
+  notify: {
+    web3formsKey: "207059fa-5049-45a3-a671-77f192111f71",
+    subject: "{herName} said YES 💍",
   },
 };

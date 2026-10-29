@@ -1,20 +1,39 @@
-// The opening cinema: tapping the ticket starts the film; scrolling away docks it in the corner.
+// The opening cinema: the ticket opens the curtains, a title card asks her to listen closely,
+// "Roll the film" starts the video, and scrolling away docks it in the corner.
 window.Cinema = (function () {
   function init() {
     const ticket = document.getElementById("ticket");
+    const preshow = document.getElementById("preshow");
+    const roll = document.getElementById("roll-film");
     const screen = document.getElementById("screen");
     const after = document.getElementById("cinema-after");
     const cue = document.getElementById("cinema-cue");
     let rolling = false;
 
+    // 1. The ticket gets her in: lights down, curtains open, the title card appears.
     ticket.addEventListener(
       "click",
       () => {
-        Music.start(); // must run inside the tap so the film may play with sound
         ticket.disabled = true;
         Motion.playCinema(() => {
+          preshow.hidden = false;
+          roll.hidden = false;
+          Motion.preshow(preshow, roll);
+        });
+      },
+      { once: true }
+    );
+
+    // 2. "Roll the film" starts the video — inside the tap, so the browser lets it play with sound.
+    roll.addEventListener(
+      "click",
+      () => {
+        Music.start();
+        roll.disabled = true;
+        Motion.rollFilm(preshow, roll, () => {
+          preshow.hidden = true;
+          roll.hidden = true;
           rolling = true;
-          Music.fromTheTop();
           document.documentElement.classList.remove("is-locked");
           after.hidden = false;
           cue.hidden = false;

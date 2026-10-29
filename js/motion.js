@@ -150,6 +150,30 @@ window.Motion = (function () {
     );
   }
 
+  // The title card fades up on the screen word by word; the button only arrives once she's read it.
+  function preshow(card, button) {
+    if (!on) return;
+    const line = SplitText.create(card.querySelector(".preshow__line"), { type: "words" });
+    gsap
+      .timeline()
+      .from(card, { autoAlpha: 0, duration: 0.8 })
+      .add(write(card.querySelector(".preshow__title"), { duration: 1.2 }), 0.2)
+      .from(line.words, { autoAlpha: 0, y: 8, duration: 0.5, stagger: 0.07 }, 0.9)
+      .from(button, { autoAlpha: 0, scale: 0.6, duration: 0.6, ease: "back.out(2)" }, "+=0.3");
+  }
+
+  // The card flickers off like a film cut, and the film begins.
+  function rollFilm(card, button, onRolled) {
+    if (!on) {
+      onRolled();
+      return;
+    }
+    gsap
+      .timeline({ onComplete: onRolled })
+      .to(button, { autoAlpha: 0, scale: 0.85, duration: 0.3 })
+      .to(card, { keyframes: { opacity: [1, 0.3, 0.9, 0.15, 0.6, 0] }, duration: 0.7, ease: "none" }, 0.1);
+  }
+
   // Fade in whatever appears once the film is rolling.
   function appear(els) {
     if (!on) return;
@@ -393,6 +417,8 @@ window.Motion = (function () {
     enabled: on,
     intro,
     playCinema,
+    preshow,
+    rollFilm,
     appear,
     fly,
     tuck,
