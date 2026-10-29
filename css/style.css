@@ -1,0 +1,1279 @@
+/* ---------- Tokens ---------- */
+:root {
+  --night: #23070f;
+  --wine: #4a1020;
+  --wine-soft: #6b1a30;
+  --rose: #c8456b;
+  --blush: #f3b9c8;
+  --gold: #d9b46f;
+  --cream: #f8ecdf;
+  --paper: #fbf3e8;
+  --ink: #3a121d;
+
+  --serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --script: "Pinyon Script", "Snell Roundhand", cursive;
+
+  --gutter: 16px;
+  --shadow-photo: 0 18px 40px rgba(20, 3, 8, 0.55), 0 2px 6px rgba(20, 3, 8, 0.35);
+
+  /* Where the film parks while she scrolls */
+  --dock-w: 200px;
+  --dock-right: 12px;
+  --dock-bottom: calc(54px + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 900px) {
+  :root {
+    --dock-w: 300px;
+    --dock-right: 20px;
+    --dock-bottom: 62px;
+  }
+}
+
+/* ---------- Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background:
+    radial-gradient(120% 60% at 50% 0%, var(--wine) 0%, transparent 70%),
+    radial-gradient(90% 50% at 50% 100%, #3a0c19 0%, transparent 70%),
+    var(--night);
+  background-attachment: fixed;
+  color: var(--cream);
+  font-family: var(--serif);
+  font-size: 1.1875rem;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Soft film grain over everything */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Until she starts the film */
+html.is-locked,
+html.is-locked body {
+  overflow: hidden;
+}
+
+img,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* ---------- Shared pieces ---------- */
+.section-title {
+  margin: 0 0 0.25em;
+  font-family: var(--script);
+  font-weight: 400;
+  font-size: clamp(3rem, 13vw, 4.75rem);
+  line-height: 1.15;
+  color: var(--blush);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.section-intro {
+  max-width: 24em;
+  margin: 0 auto;
+  font-style: italic;
+  text-align: center;
+  color: rgba(248, 236, 223, 0.82);
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.7em 1.6em;
+  border: 0;
+  border-radius: 999px;
+  background: var(--rose);
+  color: var(--cream);
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(200, 69, 107, 0.35);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.text-link {
+  color: var(--gold);
+  font-style: italic;
+  text-underline-offset: 0.2em;
+}
+
+/* Polaroid frame */
+.polaroid {
+  margin: 0;
+  padding: 10px 10px 0;
+  background: var(--paper);
+  border-radius: 3px;
+  box-shadow: var(--shadow-photo);
+  transform: rotate(var(--tilt, 0deg));
+}
+
+.polaroid__media {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  background: #2c0b14;
+}
+
+/* Selfie clips move around, so show them uncropped at their phone shape */
+video.polaroid__media {
+  aspect-ratio: 9 / 16;
+}
+
+.polaroid__caption {
+  padding: 0.55em 0.4em 0.8em;
+  font-style: italic;
+  font-size: 1.15rem;
+  line-height: 1.3;
+  color: var(--ink);
+  text-align: center;
+}
+
+/* ---------- [0] Cinema ---------- */
+/* No transform, filter, opacity or z-index on .cinema / .stage ancestors of the player:
+   the docked player is position: fixed and must stay relative to the viewport. */
+.cinema {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2.75rem var(--gutter) 8rem;
+  overflow: hidden;
+  background:
+    radial-gradient(85% 55% at 50% 48%, #3d0d1b 0%, transparent 75%),
+    #1a050b;
+}
+
+.cinema__bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 8;
+  height: 5.5vh;
+  background: #000;
+  pointer-events: none;
+  transform: scaleY(0);
+}
+
+.cinema__bar--top {
+  top: 0;
+  transform-origin: top;
+}
+
+.cinema__bar--bottom {
+  bottom: 0;
+  transform-origin: bottom;
+}
+
+/* Marquee sign */
+.marquee {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 25rem;
+  padding: 0.85rem 1.2rem;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #2c0912 0%, #1d060c 100%);
+  box-shadow:
+    0 0 0 1px rgba(217, 180, 111, 0.55),
+    0 0 0 6px rgba(29, 6, 12, 0.9),
+    0 0 0 7px rgba(217, 180, 111, 0.25),
+    0 0 50px rgba(217, 180, 111, 0.12);
+  text-align: center;
+}
+
+.marquee__bulbs {
+  display: flex;
+  justify-content: space-between;
+}
+
+.marquee__bulb {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffe6ad;
+  box-shadow: 0 0 6px 2px rgba(255, 210, 130, 0.6);
+}
+
+.marquee__kicker {
+  margin: 0.55rem 0 0;
+  font-style: italic;
+  font-size: 1.15rem;
+  color: rgba(248, 236, 223, 0.8);
+}
+
+.marquee__title {
+  margin: -0.05em 0 0;
+  padding: 0 0.15em;
+  font-family: var(--script);
+  font-size: clamp(3.6rem, 17vw, 5.6rem);
+  line-height: 1.15;
+  color: var(--gold);
+  text-shadow: 0 0 22px rgba(217, 180, 111, 0.4);
+}
+
+.marquee__sub {
+  margin: 0 0 0.55rem;
+  font-size: 1.2rem;
+  color: var(--cream);
+}
+
+/* Stage: valance, curtains, screen */
+.stage {
+  position: relative;
+  z-index: 20;
+  width: min(100%, clamp(280px, calc((100svh - 440px) * 1.93), 980px));
+  padding: 16px 4% 0;
+  overflow: hidden;
+}
+
+.stage::after {
+  /* the stage floor */
+  content: "";
+  display: block;
+  height: 10px;
+  margin: 0 -5%;
+  background: linear-gradient(180deg, #3a0c19, #12030a);
+}
+
+.screen {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 4px;
+  background: radial-gradient(70% 70% at 50% 50%, #1b0710, #050102);
+  /* Three shadows so GSAP can blend to the "projector on" glow (same count) */
+  box-shadow:
+    0 0 0 1px rgba(217, 180, 111, 0.45),
+    0 0 0 0 rgba(255, 232, 214, 0),
+    0 18px 50px rgba(0, 0, 0, 0.6);
+}
+
+.no-motion .cinema.is-playing .screen {
+  box-shadow:
+    0 0 0 1px rgba(217, 180, 111, 0.6),
+    0 0 70px 12px rgba(255, 232, 214, 0.16),
+    0 18px 50px rgba(0, 0, 0, 0.6);
+}
+
+.stage__valance {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  height: 30px;
+  background:
+    radial-gradient(15px 13px at 15px 0, #7a1530 97%, transparent 100%) 0 16px / 30px 14px repeat-x,
+    linear-gradient(180deg, #3f0916 0%, #7a1530 100%) 0 0 / 100% 16px no-repeat;
+  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.5));
+  pointer-events: none;
+}
+
+.curtain {
+  position: absolute;
+  top: 0;
+  bottom: 10px;
+  z-index: 2;
+  width: 50.5%;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, transparent 18%, transparent 75%, rgba(0, 0, 0, 0.5) 100%),
+    repeating-linear-gradient(90deg, #4f0c1d 0px, #851a34 12px, #a5243f 19px, #7c1630 28px, #4f0c1d 38px);
+  pointer-events: none;
+}
+
+.curtain--left {
+  left: 0;
+  box-shadow: inset -14px 0 18px rgba(0, 0, 0, 0.45);
+}
+
+.curtain--right {
+  right: 0;
+  box-shadow: inset 14px 0 18px rgba(0, 0, 0, 0.45);
+}
+
+.stage__overlay {
+  position: absolute;
+  inset: 16px 4% 10px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* The ticket is the play button */
+.ticket {
+  display: flex;
+  width: min(86%, 320px);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  pointer-events: auto;
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.55));
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.ticket__main,
+.ticket__stub {
+  display: flex;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.ticket__main {
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.6rem 0.8rem 0.75rem;
+  border-radius: 8px 0 0 8px;
+  border-right: 2px dashed rgba(58, 18, 29, 0.3);
+  -webkit-mask:
+    radial-gradient(circle 9px at 100% 0, transparent 97%, #000) top / 100% 51% no-repeat,
+    radial-gradient(circle 9px at 100% 100%, transparent 97%, #000) bottom / 100% 51% no-repeat;
+  mask:
+    radial-gradient(circle 9px at 100% 0, transparent 97%, #000) top / 100% 51% no-repeat,
+    radial-gradient(circle 9px at 100% 100%, transparent 97%, #000) bottom / 100% 51% no-repeat;
+}
+
+.ticket__stub {
+  width: 27%;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.2rem;
+  border-radius: 0 8px 8px 0;
+  -webkit-mask:
+    radial-gradient(circle 9px at 0 0, transparent 97%, #000) top / 100% 51% no-repeat,
+    radial-gradient(circle 9px at 0 100%, transparent 97%, #000) bottom / 100% 51% no-repeat;
+  mask:
+    radial-gradient(circle 9px at 0 0, transparent 97%, #000) top / 100% 51% no-repeat,
+    radial-gradient(circle 9px at 0 100%, transparent 97%, #000) bottom / 100% 51% no-repeat;
+}
+
+.ticket__stub span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-style: italic;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  color: rgba(58, 18, 29, 0.75);
+}
+
+.ticket__top {
+  font-style: italic;
+  font-size: 1rem;
+  color: rgba(58, 18, 29, 0.75);
+}
+
+.ticket__name {
+  font-family: var(--script);
+  font-size: 2.3rem;
+  line-height: 1.15;
+  color: var(--wine);
+}
+
+.ticket__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  margin-top: 0.15rem;
+  padding: 0.3em 0.95em 0.3em 0.7em;
+  border-radius: 999px;
+  background: var(--rose);
+  color: var(--cream);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.ticket__action svg {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+}
+
+/* Inside the screen */
+.screen__hint {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  z-index: 2;
+  margin: 0;
+  padding: 0.35em 0.9em;
+  border-radius: 999px;
+  background: rgba(26, 5, 11, 0.9);
+  box-shadow: 0 0 0 1px rgba(217, 180, 111, 0.4);
+  font-style: italic;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.screen__fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 1rem;
+  border-radius: 4px;
+  background: #0b0204;
+  text-align: center;
+}
+
+.screen__fallback p {
+  margin: 0;
+  color: rgba(248, 236, 223, 0.75);
+}
+
+.screen__fallback a {
+  color: var(--gold);
+  font-weight: 600;
+  font-size: 1.15rem;
+}
+
+/* House lights, projector beam, seats */
+.cinema__dim {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: radial-gradient(70% 45% at 50% 50%, rgba(6, 1, 3, 0.55) 0%, rgba(6, 1, 3, 0.9) 100%);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.beam {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  bottom: 0;
+  width: 150%;
+  height: 60%; /* set exactly in JS when the film starts */
+  margin-left: -75%;
+  background: linear-gradient(0deg, rgba(255, 240, 222, 0.24) 0%, rgba(255, 240, 222, 0.06) 75%, transparent 100%);
+  clip-path: polygon(48% 100%, 52% 100%, 84% 0, 16% 0);
+  filter: blur(1.5px);
+  mix-blend-mode: screen;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.beam__dust {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 244, 228, 0.9);
+}
+
+/* Two rows of seat backs, silhouetted in front of the projector beam */
+.seats {
+  position: absolute;
+  z-index: 6;
+  left: -5%;
+  right: -5%;
+  bottom: 0;
+  height: 130px;
+  background:
+    radial-gradient(32px 46px at 50% 100%, #0a0104 97%, transparent 100%) 0 100% / 72px 60px repeat-x,
+    radial-gradient(33px 47px at 50% 100%, rgba(255, 226, 210, 0.12) 97%, transparent 100%) 0 calc(100% - 1px) / 72px 61px repeat-x,
+    radial-gradient(27px 38px at 50% 100%, #14040a 97%, transparent 100%) 36px calc(100% - 40px) / 72px 50px repeat-x,
+    radial-gradient(28px 39px at 50% 100%, rgba(255, 226, 210, 0.08) 97%, transparent 100%) 36px calc(100% - 41px) / 72px 51px repeat-x,
+    linear-gradient(180deg, transparent 55%, #0a0104 100%);
+  pointer-events: none;
+}
+
+.cinema__after {
+  position: relative;
+  z-index: 20;
+  max-width: 21em;
+  margin: 0;
+  font-style: italic;
+  font-size: 1.15rem;
+  line-height: 1.45;
+  text-align: center;
+  text-wrap: balance;
+  color: rgba(248, 236, 223, 0.85);
+}
+
+.cinema .scroll-cue {
+  z-index: 20;
+  bottom: 1.8rem;
+}
+
+/* No GSAP (or reduced motion): the same moments as plain transitions */
+.no-motion .curtain {
+  transition: transform 1.4s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.no-motion .cinema.is-playing .curtain--left {
+  transform: translateX(-92%);
+}
+
+.no-motion .cinema.is-playing .curtain--right {
+  transform: translateX(92%);
+}
+
+.no-motion .ticket,
+.no-motion .cinema__dim,
+.no-motion .beam,
+.no-motion .cinema__bar {
+  transition: opacity 0.6s ease, visibility 0.6s ease, transform 0.8s ease;
+}
+
+.no-motion .cinema.is-playing .ticket {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.no-motion .cinema.is-playing .cinema__dim {
+  opacity: 1;
+  visibility: visible;
+}
+
+.no-motion .cinema.is-playing .beam {
+  opacity: 0.6;
+  visibility: visible;
+}
+
+.no-motion .cinema.is-playing .cinema__bar {
+  transform: scaleY(1);
+}
+
+/* Held back until the intro animation has set its starting positions */
+.motion-pending .marquee,
+.motion-pending .stage__overlay,
+.motion-pending .seats {
+  visibility: hidden;
+}
+
+/* ---------- [1] Hero ---------- */
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4.5rem var(--gutter) 5rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero__hearts {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.float-heart {
+  position: absolute;
+  bottom: -3rem;
+  left: var(--x);
+  font-size: var(--size);
+  line-height: 1;
+  color: var(--blush);
+  opacity: 0;
+  animation: rise var(--dur) linear var(--delay) infinite;
+}
+
+@keyframes rise {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--alpha);
+  }
+  50% {
+    transform: translate(var(--sway), -55vh);
+  }
+  90% {
+    opacity: var(--alpha);
+  }
+  100% {
+    transform: translate(0, -110vh);
+    opacity: 0;
+  }
+}
+
+.hero__greeting {
+  position: relative;
+  margin: 0 0 1.1rem;
+  font-style: italic;
+  font-size: clamp(1.6rem, 6.5vw, 2.2rem);
+  line-height: 1.2;
+}
+
+.polaroid--hero {
+  --tilt: -3deg;
+  position: relative;
+  width: min(70vw, 330px);
+  padding-bottom: 46px;
+}
+
+.polaroid--hero .polaroid__media {
+  aspect-ratio: 3 / 4;
+}
+
+.hero__name {
+  position: relative;
+  z-index: 2;
+  margin: -0.62em 0 0;
+  font-family: var(--script);
+  font-weight: 400;
+  font-size: clamp(4.5rem, 23vw, 9.5rem);
+  line-height: 1.1;
+  color: var(--blush);
+  text-shadow: 0 4px 22px rgba(35, 7, 15, 0.85), 0 1px 2px rgba(35, 7, 15, 0.6);
+}
+
+.hero__line {
+  position: relative;
+  max-width: 21em;
+  margin: 0.6rem auto 0;
+  font-size: 1.3rem;
+  line-height: 1.5;
+  color: rgba(248, 236, 223, 0.9);
+}
+
+.scroll-cue {
+  position: absolute;
+  bottom: 1.4rem;
+  left: 50%;
+  margin-left: -1.25rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  color: var(--gold);
+  text-decoration: none;
+  animation: nudge 2.4s ease-in-out infinite;
+}
+
+@keyframes nudge {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+/* ---------- [2] Gallery ---------- */
+.gallery {
+  padding: 5rem var(--gutter) 6rem;
+}
+
+.gallery__board {
+  max-width: 980px;
+  margin: 2.5rem auto 0;
+}
+
+.gallery__item {
+  position: relative;
+  width: 78%;
+  max-width: 320px;
+}
+
+.gallery__item--video {
+  width: 64%;
+  max-width: 260px;
+}
+
+.gallery__item + .gallery__item {
+  margin-top: -1rem;
+}
+
+.gallery__item:nth-child(odd) {
+  --tilt: -2.5deg;
+  margin-right: auto;
+}
+
+.gallery__item:nth-child(even) {
+  --tilt: 3deg;
+  margin-left: auto;
+}
+
+.gallery__item:nth-child(3n) {
+  --tilt: -1deg;
+}
+
+/* A strip of tape holding each photo down */
+.gallery__item::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 84px;
+  height: 24px;
+  margin-left: -42px;
+  background: rgba(243, 185, 200, 0.45);
+  transform: rotate(-4deg);
+}
+
+@media (min-width: 760px) {
+  .gallery__board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3.5rem 2.5rem;
+    align-items: start;
+  }
+
+  /* Beats the mobile zig-zag margins (nth-child selectors above) */
+  .gallery__board > .gallery__item:nth-child(n) {
+    width: auto;
+    max-width: none;
+    margin: 0;
+  }
+
+  .gallery__board > .gallery__item:nth-child(3n + 2) {
+    transform: rotate(var(--tilt)) translateY(3rem);
+  }
+}
+
+/* ---------- [3] Poem ---------- */
+.poem {
+  padding: 4rem var(--gutter) 6rem;
+}
+
+.letter {
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 2.6rem 1.25rem 2.2rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.4), transparent 30%),
+    var(--paper);
+  color: var(--ink);
+  border-radius: 2px;
+  box-shadow: var(--shadow-photo);
+  transform: rotate(-0.6deg);
+}
+
+.letter__title {
+  margin: 0 0 1.2rem;
+  font-family: var(--script);
+  font-weight: 400;
+  font-size: clamp(2.6rem, 11vw, 3.6rem);
+  line-height: 1.15;
+  color: var(--wine);
+  text-align: center;
+}
+
+.stanza {
+  margin: 0 0 1.5em;
+  /* Sized so the longest line fits on one row on phones */
+  font-size: clamp(1rem, 4.2vw, 1.28rem);
+  line-height: 1.65;
+}
+
+/* If a line still wraps, indent the overflow like a printed poem */
+.stanza span {
+  display: block;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+
+.letter__sign {
+  margin: 0.5rem 0 0;
+  font-family: var(--script);
+  font-size: 2.4rem;
+  line-height: 1.2;
+  color: var(--wine);
+  text-align: right;
+}
+
+@media (min-width: 600px) {
+  .letter {
+    padding: 3.2rem 3.4rem 2.6rem;
+  }
+}
+
+/* ---------- [4] Game ---------- */
+.game {
+  padding: 4rem var(--gutter) 6rem;
+}
+
+.game__count {
+  margin: 1.4rem 0 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--gold);
+}
+
+.game__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.card {
+  position: relative;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  perspective: 600px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.card__inner {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+
+.card.is-flipped .card__inner,
+.card.is-matched .card__inner {
+  transform: rotateY(180deg);
+}
+
+.card__back,
+.card__face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  overflow: hidden;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.card__back {
+  background:
+    radial-gradient(circle at 50% 40%, rgba(243, 185, 200, 0.18), transparent 65%),
+    var(--wine-soft);
+  box-shadow: inset 0 0 0 1px rgba(217, 180, 111, 0.45);
+}
+
+.card__back svg {
+  width: 42%;
+  height: auto;
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 1.6;
+}
+
+.card__face {
+  transform: rotateY(180deg);
+  background: #2c0b14;
+}
+
+.card__face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card.is-matched .card__face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 3px var(--gold);
+}
+
+.card.is-matched {
+  cursor: default;
+}
+
+.game__reasons {
+  max-width: 26rem;
+  margin: 2rem auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.game__reasons li {
+  position: relative;
+  margin: 0 0 0.7rem;
+  padding: 0.75rem 1rem 0.75rem 2.6rem;
+  background: rgba(251, 243, 232, 0.07);
+  border-radius: 10px;
+  font-size: 1.25rem;
+  line-height: 1.4;
+}
+
+.game__reasons li::before {
+  content: "\2665";
+  position: absolute;
+  left: 1rem;
+  top: 0.8rem;
+  color: var(--rose);
+}
+
+.no-motion .game__reasons li.is-new {
+  animation: note-in 0.7s ease;
+}
+
+@keyframes note-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+    background: rgba(243, 185, 200, 0.3);
+  }
+}
+
+.game__done {
+  margin-top: 2.2rem;
+  text-align: center;
+}
+
+.game__done-line {
+  max-width: 20em;
+  margin: 0 auto 1.4rem;
+  font-style: italic;
+  font-size: 1.45rem;
+  line-height: 1.4;
+}
+
+/* ---------- [5] Finale ---------- */
+.finale {
+  min-height: 100svh;
+  padding: 5rem var(--gutter) 9rem;
+  text-align: center;
+}
+
+.finale__ask {
+  min-height: 70svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.finale__name {
+  margin: 0;
+  font-family: var(--script);
+  font-size: clamp(4rem, 20vw, 7.5rem);
+  line-height: 1.1;
+  color: var(--blush);
+}
+
+.finale__question {
+  margin: 0.2rem 0 0.4rem;
+  font-weight: 500;
+  font-style: italic;
+  font-size: clamp(2rem, 8.5vw, 3.2rem);
+  line-height: 1.15;
+}
+
+.finale__sub {
+  margin: 0 0 2.4rem;
+  color: rgba(248, 236, 223, 0.75);
+}
+
+.finale__buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 5rem;
+}
+
+/* GSAP animates these when it's available; the transitions are the no-GSAP version */
+.no-motion .btn--yes {
+  transform: scale(var(--grow, 1));
+  transition: transform 0.35s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+.btn--no {
+  background: transparent;
+  border: 1px solid rgba(248, 236, 223, 0.45);
+  box-shadow: none;
+  font-weight: 500;
+}
+
+.no-motion .btn--no {
+  transition: left 0.25s ease, top 0.25s ease, opacity 0.4s ease;
+}
+
+.btn--no.is-loose {
+  position: fixed;
+  z-index: 45;
+  background: var(--night);
+}
+
+.btn--no.is-gone {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.finale__official {
+  padding-top: 3rem;
+}
+
+.finale__heading {
+  margin: 0;
+  font-family: var(--script);
+  font-weight: 400;
+  font-size: clamp(3.6rem, 17vw, 6rem);
+  line-height: 1.15;
+  color: var(--blush);
+}
+
+.finale__line {
+  margin: 0.2rem 0 2.6rem;
+  font-size: clamp(1.5rem, 6vw, 2rem);
+  font-style: italic;
+  line-height: 1.3;
+}
+
+.certificate {
+  position: relative;
+  max-width: 30rem;
+  margin: 0 auto;
+  padding: 2.4rem 1.4rem 2.6rem;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--gold);
+  outline: 1px solid var(--gold);
+  outline-offset: -9px;
+  border-radius: 2px;
+  box-shadow: var(--shadow-photo);
+}
+
+.certificate p {
+  margin: 0;
+}
+
+.certificate__title {
+  margin-bottom: 1rem !important;
+  font-family: var(--script);
+  font-size: clamp(2.3rem, 10vw, 3rem);
+  line-height: 1.2;
+  color: var(--wine);
+}
+
+.certificate__small {
+  font-style: italic;
+  font-size: 1.15rem;
+}
+
+.certificate__name {
+  margin: 0.15rem 0 0.4rem !important;
+  font-family: var(--script);
+  font-size: clamp(2.4rem, 11vw, 3.2rem);
+  line-height: 1.25;
+  color: var(--rose);
+}
+
+.certificate__date {
+  margin-top: 1.4rem !important;
+  font-size: 1.05rem;
+  color: rgba(58, 18, 29, 0.8);
+}
+
+.certificate__seal {
+  position: absolute;
+  right: 14px;
+  bottom: -22px;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #a42a49 0%, #7a1832 60%, #5c1024 100%);
+  box-shadow: 0 4px 10px rgba(20, 3, 8, 0.45), inset 0 0 0 4px rgba(217, 180, 111, 0.35);
+  font-family: var(--script);
+  font-size: 2.1rem;
+  line-height: 1;
+  color: var(--gold);
+  transform: rotate(-12deg);
+}
+
+.phone {
+  width: min(62vw, 240px);
+  margin: 4rem auto 0;
+}
+
+.phone__screen {
+  aspect-ratio: 9 / 20;
+  border: 9px solid #1c070d;
+  border-radius: 30px;
+  overflow: hidden;
+  background: #1c070d;
+  box-shadow: var(--shadow-photo), 0 0 0 1px rgba(217, 180, 111, 0.35);
+}
+
+.phone__screen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.phone__caption {
+  margin-top: 0.6rem;
+  font-family: var(--script);
+  font-size: 3rem;
+  line-height: 1.2;
+  color: var(--blush);
+}
+
+.finale__last {
+  max-width: 21em;
+  margin: 2.2rem auto 0;
+  font-size: 1.4rem;
+  line-height: 1.5;
+}
+
+.finale__sign {
+  margin: 0.3rem 0 2rem;
+  font-family: var(--script);
+  font-size: 2.6rem;
+  line-height: 1.2;
+  color: var(--gold);
+}
+
+/* ---------- The film player (on the screen, flying, or docked) ---------- */
+.player {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #000;
+}
+
+.player iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.player.is-docked,
+.player.is-flying {
+  position: fixed;
+  z-index: 40;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(10, 2, 4, 0.6), 0 0 0 1px rgba(217, 180, 111, 0.45);
+}
+
+.player.is-docked {
+  inset: auto var(--dock-right) var(--dock-bottom) auto;
+  width: var(--dock-w);
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+
+/* Must come after .is-docked: while flying, inline left/top/width/height take over */
+.player.is-flying {
+  inset: auto;
+}
+
+.dock-slot {
+  position: fixed;
+  right: var(--dock-right);
+  bottom: var(--dock-bottom);
+  width: var(--dock-w);
+  aspect-ratio: 16 / 9;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.dock-toggle {
+  position: fixed;
+  z-index: 41;
+  right: var(--dock-right);
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  padding: 0.45em 0.95em;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(26, 5, 11, 0.9);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 0 1px rgba(217, 180, 111, 0.4);
+  color: var(--cream);
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.2;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Tucked away (no-GSAP version; with GSAP the slide is animated) */
+.no-motion .player.is-collapsed {
+  transform: translateX(calc(100% + 24px));
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .float-heart,
+  .scroll-cue {
+    animation: none;
+  }
+
+  .no-motion .curtain {
+    transition-duration: 0.4s;
+  }
+
+  .card__inner {
+    transition: none;
+  }
+
+  .no-motion .game__reasons li.is-new {
+    animation: none;
+  }
+}
